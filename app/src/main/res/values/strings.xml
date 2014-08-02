@@ -8,6 +8,10 @@
     <string name="action_global_settings">Global Settings</string>
     <string name="action_help">Help</string>
 
+    <string name="title_welcome">Welcome!</string>
+    <string name="welcome_message">WELCOME MESSAGE. ADD STUFF HERE</string>
+    <string name="button_OK">OK</string>
+
     <string name="profiles">Profiles</string>
 
     <string name="title_activity_help">Help</string>
