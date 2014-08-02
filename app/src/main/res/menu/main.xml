@@ -1,8 +1,21 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".MainActivity" >
-    <item android:id="@+id/action_settings"
-        android:title="@string/action_settings"
-        android:orderInCategory="100"
+
+    <item android:id="@+id/action_new_profile"
+        android:title="@string/action_new_profile"
+        android:icon="@drawable/ic_action_new"
+        android:showAsAction="ifRoom" />
+
+    <item android:id="@+id/action_change_PIN"
+        android:title="@string/action_change_PIN"
+        android:showAsAction="never" />
+
+    <item android:id="@+id/action_global_settings"
+        android:title="@string/action_global_settings"
+        android:showAsAction="never" />
+
+    <item android:id="@+id/action_help"
+        android:title="@string/action_help"
         android:showAsAction="never" />
 </menu>

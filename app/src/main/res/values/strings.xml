@@ -2,7 +2,14 @@
 <resources>
 
     <string name="app_name">LockDown</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+
+    <string name="action_new_profile">New Profile</string>
+    <string name="action_change_PIN">Change Launch PIN</string>
+    <string name="action_global_settings">Global Settings</string>
+    <string name="action_help">Help</string>
+
+    <string name="profiles">Profiles</string>
+
+    <string name="title_activity_help">Help</string>
 
 </resources>
