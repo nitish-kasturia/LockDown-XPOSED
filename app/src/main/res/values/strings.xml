@@ -14,6 +14,14 @@
 
     <string name="profiles">Profiles</string>
 
+    <string name="title_new_profile">New Profile</string>
+    <string name="option_PIN">PIN</string>
+    <string name="option_pattern">Pattern</string>
+
     <string name="title_activity_help">Help</string>
+
+    <string name="title_activity_global_settings">Global Settings</string>
+    <string name="quick_unlock">Quick Unlock</string>
+    <string name="quick_unlock_summary">Unlock automatically when correct PIN is entered</string>
 
 </resources>

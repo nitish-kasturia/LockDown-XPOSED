@@ -10,13 +10,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.stericson.RootTools.RootTools;
 import com.stericson.RootTools.exceptions.RootDeniedException;
 import com.stericson.RootTools.execution.CommandCapture;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.TimeoutException;
 
 public class MainActivity extends Activity {
@@ -57,9 +60,10 @@ public class MainActivity extends Activity {
             dialog.show();
         }
 
-        //TODO Refresh list
-
         ListView profilesList = (ListView) findViewById(R.id.listview_profileList);
+
+        refreshProfileList(profilesList);
+
         registerForContextMenu(profilesList);
 
         profilesList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -80,11 +84,11 @@ public class MainActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if(id == R.id.action_new_profile){
-            //Create New Profile
+            newProfile();
         }else if(id == R.id.action_change_PIN){
             //Change PIN
         }else if(id == R.id.action_global_settings){
-            //Global Settings
+            startActivity(new Intent(this, GlobalSettings.class));
         }else if (id == R.id.action_help) {
             startActivity(new Intent(this, HelpActivity.class));
         }
@@ -92,11 +96,56 @@ public class MainActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void newProfile(){
-        //TODO Create new profile
+    private void newProfile() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.title_new_profile);
+        builder.setItems(R.array.unlock_methods, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int selection) {
+                if(selection == 0){
+                    newPIN();
+                }else if(selection == 1){
+                    Toast.makeText(getApplicationContext(), "Pattern unlock is WIP", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        builder.create().show();
+    }
+
+    private void newPIN(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("New PIN Profile");
+        builder.setView(getLayoutInflater().inflate(R.layout.dialog_new_pin, null));
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener(){
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                //Make profile with given data
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener(){
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //User cancelled. Do nothing
+            }
+        });
+        builder.create().show();
     }
 
     private void changePIN(){
         //TODO Change launch PIN
+    }
+
+    private void refreshProfileList(ListView profilesList){
+        if(fileList().length > 0){
+            //SHOW FILES
+        }else{
+            profilesList.setClickable(false);
+            profilesList.setLongClickable(false);
+            ArrayList<String> fileList = new ArrayList<String>();
+            fileList.add("No Profiles");
+
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.listview_empty_profile, fileList);
+            profilesList.setAdapter(adapter);
+        }
     }
 }
