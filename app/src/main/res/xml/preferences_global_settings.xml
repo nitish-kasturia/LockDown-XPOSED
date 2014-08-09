@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <CheckBoxPreference
-        android:title="@string/quick_unlock"
-        android:summary="@string/quick_unlock_summary"
-        android:key="preference_quick_unlock"
-        android:defaultValue="false"/>
+    <PreferenceCategory
+        android:title="@string/category_PIN_settings">
+        <CheckBoxPreference
+            android:title="@string/quick_unlock"
+            android:summary="@string/quick_unlock_summary"
+            android:key="preference_quick_unlock"
+            android:defaultValue="false"/>
+    </PreferenceCategory>
 </PreferenceScreen>

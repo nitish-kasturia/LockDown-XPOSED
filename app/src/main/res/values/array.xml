@@ -2,6 +2,7 @@
 <resources>
     <array name="unlock_methods">
         <item>@string/option_PIN</item>
+        <item>@string/option_password</item>
         <item>@string/option_pattern</item>
     </array>
 </resources>
