@@ -8,6 +8,7 @@
     <string name="action_change_PIN">Change Launch PIN</string>
     <string name="action_global_settings">Global Settings</string>
     <string name="action_help">Help</string>
+    <string name="action_delete_profile">Delete</string>
 
     <!-- Welcome Dialog -->
     <string name="title_welcome">Welcome!</string>

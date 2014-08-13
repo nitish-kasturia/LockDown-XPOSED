@@ -14,6 +14,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.nitishkasturia.lockdown.adapters.ProfileList;
@@ -90,13 +91,24 @@ public class MainActivity extends Activity {
             ListView list = (ListView) view.findViewById(R.id.listview_profileList);
             AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
             View profileLayout = list.getChildAt(info.position);
-            //IF view.id != textview_empty_profile
-            //Add delete option
+            if(view.getId() != R.id.textview_empty_profile){
+                TextView profileName = (TextView) profileLayout.findViewById(R.id.textview_profile_name);
+                menu.setHeaderTitle(profileName.getText().toString());
+                menu.add(R.string.action_delete_profile);
+            }
         }
     }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
+        if(item.getTitle().toString().equals(getString(R.string.action_delete_profile))){
+            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+            ListView profileList = (ListView) findViewById(R.id.listview_profileList);
+            View profileListView = profileList.getChildAt(info.position);
+            TextView profile = (TextView) profileListView.findViewById(R.id.textview_profile_name);
+            deleteProfile(profile.getText().toString());
+            refreshProfileList();
+        }
         return true;
     }
 
@@ -131,6 +143,12 @@ public class MainActivity extends Activity {
             }
         });
         builder.create().show();
+    }
+
+    private void deleteProfile(String profile){
+        deleteFile(profile);
+        deleteFile(profile + ".settings");
+        securePrefs.edit().remove(profile).commit();
     }
 
     private void newPIN(){
