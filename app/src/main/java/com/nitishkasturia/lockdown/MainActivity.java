@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -33,12 +34,20 @@ public class MainActivity extends Activity {
 
     public static SharedPreferences securePrefs = null;
 
+    private String currentVersion = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         securePrefs = new SecurePreferences(this);
+
+        try {
+            currentVersion = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+        }catch(PackageManager.NameNotFoundException e){
+            e.printStackTrace();
+        }
 
         if(RootTools.isAccessGiven()){
             CommandCapture chmod = new CommandCapture(0, "cd data/data/com.nitishkasturia.lockdown/", "chmod -R 705 files", "chmod -R 705 shared_prefs");
@@ -53,18 +62,30 @@ public class MainActivity extends Activity {
             }
         }
 
-        if(securePrefs.getBoolean("FIRST_LAUNCH", true)){
+        if(securePrefs.getString("VERSION", "0").equals("0")){
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(R.string.title_welcome);
             builder.setMessage(R.string.welcome_message); //TODO Update welcome message
             builder.setNeutralButton(R.string.button_OK, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    securePrefs.edit().putBoolean("FIRST_LAUNCH", false).apply();
+                    securePrefs.edit().putString("VERSION", currentVersion).apply();
                 }
             });
             AlertDialog dialog = builder.create();
             dialog.show();
+        }else if(!securePrefs.getString("VERSION", "0").equals(currentVersion)){
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(R.string.title_upgrade);
+            builder.setMessage(R.string.upgrade_message);
+            builder.setNeutralButton(R.string.button_OK, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    //Do nothing
+                }
+            });
+            builder.create().show();
+            securePrefs.edit().putString("VERSION", currentVersion).apply();
         }
 
         ListView profilesList = (ListView) findViewById(R.id.listview_profileList);

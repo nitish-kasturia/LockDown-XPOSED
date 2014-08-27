@@ -15,6 +15,10 @@
     <string name="welcome_message">Thank you for purchasing LockDown!\nPlease read the Help section before using this application.</string>
     <string name="button_OK">OK</string>
 
+    <!-- Upgrade Dialog -->
+    <string name="title_upgrade">What's New!</string>
+    <string name="upgrade_message">Upgrade message here</string>
+
     <!-- MainActivity -->
     <string name="profiles">Profiles</string>
 
