@@ -2,9 +2,9 @@ package com.nitishkasturia.lockdown;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.ContextMenu;
@@ -23,16 +23,17 @@ import com.stericson.RootTools.RootTools;
 import com.stericson.RootTools.exceptions.RootDeniedException;
 import com.stericson.RootTools.execution.CommandCapture;
 
-import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.StreamCorruptedException;
 import java.util.ArrayList;
 import java.util.concurrent.TimeoutException;
 
 public class MainActivity extends Activity {
-
-    public static SharedPreferences securePrefs = null;
 
     private String currentVersion = null;
 
@@ -40,8 +41,6 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        securePrefs = new SecurePreferences(this);
 
         try {
             currentVersion = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
@@ -62,19 +61,19 @@ public class MainActivity extends Activity {
             }
         }
 
-        if(securePrefs.getString("VERSION", "0").equals("0")){
+        if(getSharedPreferences("General", 0).getString("VERSION", "0").equals("0")){
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(R.string.title_welcome);
             builder.setMessage(R.string.welcome_message); //TODO Update welcome message
             builder.setNeutralButton(R.string.button_OK, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    securePrefs.edit().putString("VERSION", currentVersion).apply();
+                    getSharedPreferences("General", 0).edit().putString("VERSION", currentVersion).apply();
                 }
             });
             AlertDialog dialog = builder.create();
             dialog.show();
-        }else if(!securePrefs.getString("VERSION", "0").equals(currentVersion)){
+        }else if(!getSharedPreferences("General", 0).getString("VERSION", "0").equals(currentVersion)){
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(R.string.title_upgrade);
             builder.setMessage(R.string.upgrade_message);
@@ -85,7 +84,7 @@ public class MainActivity extends Activity {
                 }
             });
             builder.create().show();
-            securePrefs.edit().putString("VERSION", currentVersion).apply();
+            getSharedPreferences("General", 0).edit().putString("VERSION", currentVersion).apply();
         }
 
         ListView profilesList = (ListView) findViewById(R.id.listview_profileList);
@@ -139,7 +138,7 @@ public class MainActivity extends Activity {
         if(id == R.id.action_new_profile){
             newProfile();
         }else if(id == R.id.action_change_PIN){
-            //Change PIN
+            changePIN();
         }else if(id == R.id.action_global_settings){
             startActivity(new Intent(this, GlobalSettings.class));
         }else if (id == R.id.action_help) {
@@ -168,8 +167,6 @@ public class MainActivity extends Activity {
 
     private void deleteProfile(String profile){
         deleteFile(profile);
-        deleteFile(profile + ".settings");
-        securePrefs.edit().remove(profile).commit();
     }
 
     private void newPIN(){
@@ -184,23 +181,48 @@ public class MainActivity extends Activity {
                 String confirmPin = ((EditText) ((AlertDialog) dialog).findViewById(R.id.edittext_profile_PIN_confirm)).getText().toString();
 
                 if(profileName.length() == 0 || pin.length() == 0 || confirmPin.length() == 0){
-                    Toast.makeText(getApplicationContext(), R.string.toast_missing_field, Toast.LENGTH_SHORT).show();
-                    return;
+                    Toast.makeText(getApplicationContext(), R.string.toast_missing_field, Toast.LENGTH_LONG).show();
                 }else if(pin.length() < 4){
-                    Toast.makeText(getApplicationContext(), R.string.toast_short_PIN, Toast.LENGTH_SHORT).show();
-                    return;
+                    Toast.makeText(getApplicationContext(), R.string.toast_short_PIN, Toast.LENGTH_LONG).show();
                 }else if(!pin.equals(confirmPin)){
-                    Toast.makeText(getApplicationContext(), R.string.toast_PIN_mismatch, Toast.LENGTH_SHORT).show();
-                    return;
+                    Toast.makeText(getApplicationContext(), R.string.toast_PIN_mismatch, Toast.LENGTH_LONG).show();
                 }else{
                     String fileList[] = fileList();
                     if(fileList.length > 0){
                         for(int i = 0; i < fileList.length; i++){
                             if(fileList[i].equalsIgnoreCase(profileName)){
-                                Toast.makeText(getApplicationContext(), R.string.toast_profile_exists, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getApplicationContext(), R.string.toast_profile_exists, Toast.LENGTH_LONG).show();
                                 return;
                             }
-                            //TODO Check if the same PIN exists elsewhere under a different profile name
+
+                            ArrayList<Profile> profileList = new ArrayList<Profile>();
+
+                            for(String file : fileList){
+                                try{
+                                    FileInputStream fileIn = openFileInput(file);
+                                    ObjectInputStream objectIn = new ObjectInputStream(fileIn);
+
+                                    profileList.add((Profile) objectIn.readObject());
+
+                                    objectIn.close();
+                                    fileIn.close();
+                                }catch (FileNotFoundException e){
+                                    e.printStackTrace();
+                                }catch (StreamCorruptedException e){
+                                    e.printStackTrace();
+                                }catch (IOException e){
+                                    e.printStackTrace();
+                                }catch (ClassNotFoundException e){
+                                    e.printStackTrace();
+                                }
+
+                                for(Profile profile : profileList){
+                                    if(profile.getPIN().equals(pin)){
+                                        Toast.makeText(getApplicationContext(), R.string.toast_pin_exists, Toast.LENGTH_LONG).show();
+                                        return;
+                                    }
+                                }
+                            }
                         }
                         createPIN(profileName, pin);
                         refreshProfileList();
@@ -221,27 +243,23 @@ public class MainActivity extends Activity {
     }
 
     private void createPIN(String profileName, String profilePIN){
-        try {
-            RandomAccessFile profile = new RandomAccessFile(new File(getFilesDir(), profileName), "rw");
-            RandomAccessFile profileSettings = new RandomAccessFile(new File(getFilesDir(), profileName + ".settings"), "rw");
 
-            profile.writeInt(0);                //Number of apps listed
+        Profile profile = new Profile(profileName, Profile.TYPE_PIN);
+        profile.setPIN(profilePIN);
 
-            profileSettings.writeBoolean(true); //Profile enabled location is 0
-            profileSettings.seek(5);            //Hide apps location
-            profileSettings.writeBoolean(false);
-            profileSettings.seek(10);           //Notify user location
-            profileSettings.writeBoolean(false);
+        try{
+            FileOutputStream fileOut = openFileOutput(profileName, Context.MODE_PRIVATE);
+            ObjectOutputStream oos = new ObjectOutputStream(fileOut);
 
-            profile.close();
-            profileSettings.close();
-        } catch (FileNotFoundException e) {
+            oos.writeObject(profile);
+
+            oos.close();
+            fileOut.close();
+        }catch (FileNotFoundException e){
             e.printStackTrace();
-        } catch (IOException e) {
+        }catch (IOException e){
             e.printStackTrace();
         }
-
-        securePrefs.edit().putString(profileName, profilePIN).commit();
 
         if(RootTools.isAccessGiven()){
             CommandCapture chmod = new CommandCapture(0, "cd data/data/com.nitishkasturia.lockdown/", "chmod -R 705 files", "chmod -R 705 shared_prefs");
@@ -265,22 +283,34 @@ public class MainActivity extends Activity {
         ListView profilesList = (ListView) findViewById(R.id.listview_profileList);
 
         if(fileList().length > 0){
-            profilesList.setClickable(true);
-            profilesList.setLongClickable(true);
-
-            ArrayList<String> fileList = new ArrayList<String>();
+            ArrayList<Profile> profileList = new ArrayList<Profile>();
             String files[] = fileList();
 
             for(String file : files){
-                if(!file.contains(".settings")){
-                    fileList.add(file);
+                try{
+                    FileInputStream fileIn = openFileInput(file);
+                    ObjectInputStream objectIn = new ObjectInputStream(fileIn);
+                    profileList.add((Profile) objectIn.readObject());
+
+                    objectIn.close();
+                    fileIn.close();
+                }catch (FileNotFoundException e){
+                    e.printStackTrace();
+                }catch (StreamCorruptedException e){
+                    e.printStackTrace();
+                }catch (IOException e){
+                    e.printStackTrace();
+                }catch (ClassNotFoundException e){
+                    e.printStackTrace();
                 }
             }
-            ProfileList profileListAdapter= new ProfileList(this, R.layout.listview_profiles, fileList);
+
+            ProfileList profileListAdapter= new ProfileList(this, R.layout.listview_profile, profileList);
             profilesList.setAdapter(profileListAdapter);
         }else{
             profilesList.setClickable(false);
             profilesList.setLongClickable(false);
+
             ArrayList<String> fileList = new ArrayList<String>();
             fileList.add("No Profiles");
 

@@ -16,7 +16,7 @@
     <string name="button_OK">OK</string>
 
     <!-- Upgrade Dialog -->
-    <string name="title_upgrade">What's New!</string>
+    <string name="title_upgrade">What\'s New!</string>
     <string name="upgrade_message">Upgrade message here</string>
 
     <!-- MainActivity -->
@@ -38,6 +38,7 @@
     <string name="toast_short_PIN">PIN must be at least 4 digits</string>
     <string name="toast_PIN_mismatch">PINs do not match!</string>
     <string name="toast_profile_exists">A profile with that name already exists!</string>
+    <string name="toast_pin_exists">A profile with that PIN already exists!</string>
 
     <!-- New Password Dialog -->
     <string name="password_WIP">Password profiles are coming soon!</string>
