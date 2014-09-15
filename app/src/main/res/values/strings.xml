@@ -39,6 +39,7 @@
     <string name="toast_PIN_mismatch">PINs do not match!</string>
     <string name="toast_profile_exists">A profile with that name already exists!</string>
     <string name="toast_pin_exists">A profile with that PIN already exists!</string>
+    <string name="toast_restart_device_new_profile">Restart device to enable new profile</string>
 
     <!-- New Password Dialog -->
     <string name="password_WIP">Password profiles are coming soon!</string>

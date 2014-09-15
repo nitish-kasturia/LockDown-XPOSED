@@ -7,6 +7,13 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.TextView;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.StreamCorruptedException;
+import java.util.ArrayList;
+
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;
@@ -23,6 +30,8 @@ public class LockScreenControllerKK implements IXposedHookLoadPackage{
 
     boolean pinQuickUnlock = false;
 
+    ArrayList<Profile> profileList = new ArrayList<Profile>();
+
     @Override
     public void handleLoadPackage(final XC_LoadPackage.LoadPackageParam loadPackageParam) throws Throwable {
         if(Build.VERSION.SDK_INT > 18){
@@ -37,10 +46,33 @@ public class LockScreenControllerKK implements IXposedHookLoadPackage{
 
                         //Load lockdown global preferences
                         pinQuickUnlock = PreferenceManager.getDefaultSharedPreferences(lockdownContext).getBoolean("preference_quick_unlock", false);
+
+                        String[] fileList = lockdownContext.fileList();
+                        for(String file : fileList){
+                            try{
+                                FileInputStream fileIn = lockdownContext.openFileInput(file);
+                                ObjectInputStream objectIn = new ObjectInputStream(fileIn);
+
+                                Profile profile = (Profile) objectIn.readObject();
+
+                                fileIn.close();
+                                objectIn.close();
+
+                                profileList.add(profile);
+                            }catch (FileNotFoundException e){
+                                e.printStackTrace();
+                            }catch (StreamCorruptedException e){
+                                e.printStackTrace();
+                            }catch (IOException e){
+                                e.printStackTrace();
+                            }catch (ClassNotFoundException e){
+                                e.printStackTrace();
+                            }
+                        }
                     }
                 });
 
-                XposedHelpers.findAndHookMethod("com.android.keyguard.KeyguardAbsKeyInputView",loadPackageParam.classLoader, "onFinishInflate", new XC_MethodHook(-1) {
+                XposedHelpers.findAndHookMethod("com.android.keyguard.KeyguardAbsKeyInputView",loadPackageParam.classLoader, "onFinishInflate", new XC_MethodHook(1) {
                     @Override
                     protected void afterHookedMethod(final MethodHookParam param) throws Throwable {
                         if (pinQuickUnlock) {
@@ -66,10 +98,26 @@ public class LockScreenControllerKK implements IXposedHookLoadPackage{
                                         if (callback != null && lockPatternUtils != null && entry.length() > 3 && (Boolean) XposedHelpers.callMethod(lockPatternUtils, "checkPassword", entry)) {
                                             XposedHelpers.callMethod(callback, "reportSuccessfulUnlockAttempt");
                                             XposedHelpers.callMethod(callback, "dismiss", true);
+                                        }else if(callback != null && lockPatternUtils != null && entry.length() > 3){
+                                            for(Profile profile : profileList){
+                                                if(entry.equals(profile.getPIN()) && profile.isEnabled()){
+                                                    XposedHelpers.callMethod(callback, "reportSuccessfulUnlockAttempt");
+                                                    XposedHelpers.callMethod(callback, "dismiss", true);
+                                                }
+                                            }
                                         }
                                     }
                                 });
                             }
+                        }
+                    }
+                });
+
+                XposedHelpers.findAndHookMethod("com.android.keyguard.KeyguardAbsKeyInputView", loadPackageParam.classLoader, "verifyPasswordAndUnlock", new XC_MethodHook() {
+                    @Override
+                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                        if(!pinQuickUnlock){
+                            //Check PIN against profiles and unlock
                         }
                     }
                 });

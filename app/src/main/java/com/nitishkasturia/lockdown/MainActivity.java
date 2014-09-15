@@ -274,6 +274,8 @@ public class MainActivity extends Activity {
                 e.printStackTrace();
             }
         }
+
+        Toast.makeText(getApplicationContext(), R.string.toast_restart_device_new_profile, Toast.LENGTH_SHORT).show();
     }
 
     private void changePIN(){
