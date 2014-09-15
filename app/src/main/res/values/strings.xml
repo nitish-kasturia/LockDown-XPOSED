@@ -51,6 +51,7 @@
 
     <!-- GlobalSettings -->
     <string name="title_activity_global_settings">Global Settings</string>
+    <string name="toast_restart_device_settings">Restart device to apply changes</string>
     <string name="category_PIN_settings">PIN Settings</string>
     <string name="quick_unlock">Quick Unlock</string>
     <string name="quick_unlock_summary">Unlock automatically when correct PIN is entered</string>

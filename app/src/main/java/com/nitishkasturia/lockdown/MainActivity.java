@@ -35,6 +35,7 @@ import java.util.concurrent.TimeoutException;
 
 public class MainActivity extends Activity {
 
+    //DO NOT UPDATE VERSION MANUALLY..
     private String currentVersion = null;
 
     @Override
