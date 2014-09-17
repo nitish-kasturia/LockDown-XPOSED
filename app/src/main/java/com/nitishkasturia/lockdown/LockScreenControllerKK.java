@@ -100,7 +100,7 @@ public class LockScreenControllerKK implements IXposedHookLoadPackage{
                                             XposedHelpers.callMethod(callback, "dismiss", true);
                                         }else if(callback != null && lockPatternUtils != null && entry.length() > 3){
                                             for(Profile profile : profileList){
-                                                if(entry.equals(profile.getPIN()) && profile.isEnabled()){
+                                                if(entry.equals(profile.getPIN()) && profile.isEnabled() && profile.getType().equals(Profile.TYPE_PIN)){
                                                     XposedHelpers.callMethod(callback, "reportSuccessfulUnlockAttempt");
                                                     XposedHelpers.callMethod(callback, "dismiss", true);
                                                 }
@@ -115,9 +115,23 @@ public class LockScreenControllerKK implements IXposedHookLoadPackage{
 
                 XposedHelpers.findAndHookMethod("com.android.keyguard.KeyguardAbsKeyInputView", loadPackageParam.classLoader, "verifyPasswordAndUnlock", new XC_MethodHook() {
                     @Override
-                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                    protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                         if(!pinQuickUnlock){
                             //Check PIN against profiles and unlock
+                            final TextView passwordEntry = (TextView) XposedHelpers.getObjectField(param.thisObject, "mPasswordEntry");
+                            final Object callback = XposedHelpers.getObjectField(param.thisObject, "mCallback");
+                            final Object lockPatternUtils = XposedHelpers.getObjectField(param.thisObject, "mLockPatternUtils");
+
+                            String entry = passwordEntry.getText().toString();
+
+                            if(callback != null && lockPatternUtils != null && entry.length() > 3){
+                                for(Profile profile : profileList){
+                                    if(entry.equals(profile.getPIN()) && profile.isEnabled() && profile.getType().equals(Profile.TYPE_PIN)){
+                                        XposedHelpers.callMethod(callback, "reportSuccessfulUnlockAttempt");
+                                        XposedHelpers.callMethod(callback, "dismiss", true);
+                                    }
+                                }
+                            }
                         }
                     }
                 });
