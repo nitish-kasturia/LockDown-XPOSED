@@ -9,6 +9,7 @@
     <string name="action_global_settings">Global Settings</string>
     <string name="action_help">Help</string>
     <string name="action_delete_profile">Delete</string>
+    <string name="action_save_profile">Save</string>
 
     <!-- Welcome Dialog -->
     <string name="title_welcome">Welcome!</string>
@@ -56,5 +57,17 @@
     <string name="category_PIN_settings">PIN Settings</string>
     <string name="quick_unlock">Quick Unlock</string>
     <string name="quick_unlock_summary">Unlock automatically when correct PIN is entered</string>
+    <string name="title_activity_edit_profile">Edit Profile</string>
+
+    <!-- EditProfileActivity -->
+    <string name="title_section_profile_settings">Profile Settings</string>
+    <string name="title_section_restricted_apps">Restricted Apps</string>
+
+    <!-- ProfileSettings -->
+
+
+    <!-- RestrictedApps -->
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

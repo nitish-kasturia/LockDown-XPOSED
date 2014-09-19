@@ -43,12 +43,14 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //Get current version of installed package
         try {
             currentVersion = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
         }catch(PackageManager.NameNotFoundException e){
             e.printStackTrace();
         }
 
+        //Set permissions of files to allow XposedController to access it
         if(RootTools.isAccessGiven()){
             CommandCapture chmod = new CommandCapture(0, "cd data/data/com.nitishkasturia.lockdown/", "chmod -R 705 files", "chmod -R 705 shared_prefs");
             try{
@@ -62,19 +64,20 @@ public class MainActivity extends Activity {
             }
         }
 
-        if(getSharedPreferences("General", 0).getString("VERSION", "0").equals("0")){
+        //Check for 1st launch or package upgrade
+        if(getSharedPreferences("LockDown", 0).getString("VERSION", "0").equals("0")){
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(R.string.title_welcome);
             builder.setMessage(R.string.welcome_message); //TODO Update welcome message
             builder.setNeutralButton(R.string.button_OK, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    getSharedPreferences("General", 0).edit().putString("VERSION", currentVersion).apply();
+                    getSharedPreferences("LockDown", 0).edit().putString("VERSION", currentVersion).apply();
                 }
             });
             AlertDialog dialog = builder.create();
             dialog.show();
-        }else if(!getSharedPreferences("General", 0).getString("VERSION", "0").equals(currentVersion)){
+        }else if(!getSharedPreferences("LockDown", 0).getString("VERSION", "0").equals(currentVersion)){
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(R.string.title_upgrade);
             builder.setMessage(R.string.upgrade_message);
@@ -85,7 +88,7 @@ public class MainActivity extends Activity {
                 }
             });
             builder.create().show();
-            getSharedPreferences("General", 0).edit().putString("VERSION", currentVersion).apply();
+            getSharedPreferences("LockDown", 0).edit().putString("VERSION", currentVersion).apply();
         }
 
         ListView profilesList = (ListView) findViewById(R.id.listview_profileList);
@@ -96,6 +99,7 @@ public class MainActivity extends Activity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 //Create Intent and store profile info and launch EditProfileActivity
+                startActivity(new Intent(getApplicationContext(), EditProfileActivity.class));
             }
         });
     }

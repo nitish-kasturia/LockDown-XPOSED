@@ -20,7 +20,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".HelpActivity"
             android:label="@string/title_activity_help"
@@ -29,7 +28,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.nitishkasturia.lockdown.MainActivity" />
         </activity>
-
         <activity
             android:name=".GlobalSettings"
             android:label="@string/title_activity_global_settings"
@@ -49,6 +47,10 @@
             android:name="xposedminversion"
             android:value="30" />
 
+        <activity
+            android:name=".EditProfileActivity"
+            android:label="@string/title_activity_edit_profile" >
+        </activity>
     </application>
 
 </manifest>

@@ -1,0 +1,8 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.nitishkasturia.lockdown.EditProfileActivity" >
+    <item android:id="@+id/action_save_profile"
+        android:title="@string/action_save_profile"
+        android:orderInCategory="100"
+        android:showAsAction="ifRoom" />
+</menu>

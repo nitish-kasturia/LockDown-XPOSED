@@ -23,4 +23,5 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     provided files('lib/XposedBridgeApi-54.jar')
     compile files('lib/RootTools.jar')
+    compile 'com.android.support:support-v13:20.0.0'
 }
